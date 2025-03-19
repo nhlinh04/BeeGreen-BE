@@ -42,12 +42,12 @@ public class BillController {
         List<BillStatisticalPieResponse> statistics = billService.getCompletedBillStatistics();
         return ResponseEntity.ok(statistics);
         }catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.  getMessage());
         }
     }
 
     @PutMapping("/update-status-note/{codeBill}")
-    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','CUSTOMER')")
     public ResponseEntity<?> updateBillStatusAndNote(
             @PathVariable String codeBill,
             @RequestParam String status,
