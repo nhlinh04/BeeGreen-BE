@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -85,7 +86,7 @@ public class PromotionDetailService {
                     promotionDetailOptional.get().setStatus(Status.FINISHED.toString());
                     promotionDetailRepository.save(promotionDetailOptional.get());
                 }
-                promotionDetail.setQuantity(request.getQuantity());
+                promotionDetail.setQuantity(new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
                 if (request.getQuantity() == 0) {
                     promotionDetail.setStatus(Status.FINISHED.toString());
                 } else {
@@ -104,7 +105,7 @@ public class PromotionDetailService {
             }
             // Tạo đối tượng PromotionDetail
             PromotionDetail promotionDetail = new PromotionDetail();
-            promotionDetail.setQuantity(request.getQuantity());
+            promotionDetail.setQuantity(new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
             promotionDetail.setProduct(product.get());
             promotionDetail.setPromotion(promotion);
             promotionDetail.setStatus(Status.UPCOMING.toString());
