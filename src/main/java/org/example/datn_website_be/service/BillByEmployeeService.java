@@ -633,9 +633,12 @@ public class BillByEmployeeService {
                 //Số lượng sản phẩm sale
                 double quantityProductPromotion = productPromotionResponse.get().getQuantityPromotionDetail();
                 //Giá sản phẩm sau khi sale
+                BigDecimal discount = BigDecimal.valueOf(productPromotionResponse.get().getValue()) // Chuyển đổi value thành BigDecimal
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP); // Chia và làm tròn 2 chữ số
+
                 BigDecimal promotionPrice = productPromotionResponse.get().getPricePerBaseUnit()
-                        .multiply(BigDecimal.valueOf(1 - productPromotionResponse.get().getValue() / 100))
-                        .setScale(0, RoundingMode.DOWN);
+                        .multiply(BigDecimal.ONE.subtract(discount)) // (1 - discount)
+                        .setScale(0, RoundingMode.DOWN); // Làm tròn xuống
                 //Nếu số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale
                 if (request.getQuantityCartDetail() <= quantityProductPromotion) {
                     // Tạo hóa đơn chi tiết mới
@@ -783,9 +786,12 @@ public class BillByEmployeeService {
                 //Số lượng sản phẩm sale
                 double quantityProductPromotion = productPromotionResponse.get().getQuantityPromotionDetail();
                 //Giá sản phẩm sau khi sale
+                BigDecimal discount = BigDecimal.valueOf(productPromotionResponse.get().getValue()) // Chuyển đổi value thành BigDecimal
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP); // Chia và làm tròn 2 chữ số
+
                 BigDecimal promotionPrice = productPromotionResponse.get().getPricePerBaseUnit()
-                        .multiply(BigDecimal.valueOf(1 - productPromotionResponse.get().getValue() / 100))
-                        .setScale(0, RoundingMode.DOWN);
+                        .multiply(BigDecimal.ONE.subtract(discount)) // (1 - discount)
+                        .setScale(0, RoundingMode.DOWN); // Làm tròn xuống
                 //Nếu số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale
                 if (request.getQuantity() <= quantityProductPromotion) {
                     // Tạo hóa đơn chi tiết mới

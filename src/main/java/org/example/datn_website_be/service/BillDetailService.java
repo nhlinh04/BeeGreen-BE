@@ -107,7 +107,6 @@ public class BillDetailService {
 
             //Tìm kiếm sản phẩm có đang  sale hay không
             Optional<ProductPromotionResponse> productPromotionResponse = promotionDetailRepository.findProductDetailByIdProduct(request.getIdProduct());
-
             //Kiểm tra xem nếu sản phẩm đang sale
             if (productPromotionResponse.isPresent()) {
                 //Tìm kiếm đợt giảm giá chi tiết
@@ -115,9 +114,12 @@ public class BillDetailService {
                 //Số lượng sản phẩm sale
                 double quantityProductPromotion = productPromotionResponse.get().getQuantityPromotionDetail();
                 //Giá sản phẩm sau khi sale
+                BigDecimal discount = BigDecimal.valueOf(productPromotionResponse.get().getValue()) // Chuyển đổi value thành BigDecimal
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP); // Chia và làm tròn 2 chữ số
+
                 BigDecimal promotionPrice = productPromotionResponse.get().getPricePerBaseUnit()
-                        .multiply(BigDecimal.valueOf(1 - productPromotionResponse.get().getValue() / 100))
-                        .setScale(0, RoundingMode.DOWN); // Làm tròn đến 2 chữ số thập phân
+                        .multiply(BigDecimal.ONE.subtract(discount)) // (1 - discount)
+                        .setScale(0, RoundingMode.DOWN); // Làm tròn xuống
                 //Nếu số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale
                 if (request.getQuantity() <= quantityProductPromotion) {
                     // Tìm hóa đơn chi tiết theo id hóa đơn và id sản phẩm chi tiết, giá sản phẩm
@@ -310,9 +312,12 @@ public class BillDetailService {
                 //Số lượng sản phẩm sale
                 double quantityProductPromotion = productPromotionResponse.get().getQuantityPromotionDetail();
                 //Giá sản phẩm sau khi sale
+                BigDecimal discount = BigDecimal.valueOf(productPromotionResponse.get().getValue()) // Chuyển đổi value thành BigDecimal
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP); // Chia và làm tròn 2 chữ số
+
                 BigDecimal promotionPrice = productPromotionResponse.get().getPricePerBaseUnit()
-                        .multiply(BigDecimal.valueOf(1 - productPromotionResponse.get().getValue() / 100))
-                        .setScale(0, RoundingMode.DOWN); // Làm tròn đến 2 chữ số thập phân
+                        .multiply(BigDecimal.ONE.subtract(discount)) // (1 - discount)
+                        .setScale(0, RoundingMode.DOWN); // Làm tròn xuống
                 //Nếu số lượng sản phẩm khách hàng mua nhỏ hơn số lượng đang sale
                 if (request.getQuantity() <= quantityProductPromotion) {
 
