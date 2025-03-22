@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,7 +70,7 @@ public class ProductService {
                 .name(productRequest.getName())
                 .baseUnit(productRequest.getBaseUnit())
                 .pricePerBaseUnit(productRequest.getPricePerBaseUnit())
-                .quantity(productRequest.getQuantity())
+                .quantity(new BigDecimal(productRequest.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue())
                 .category(category)
                 .build();
         product.setStatus(Status.ACTIVE.toString());
@@ -105,7 +106,7 @@ public class ProductService {
         }
         product.setName(updateProductProductUnitsRequest.getProductRequest().getName());
         product.setPricePerBaseUnit(updateProductProductUnitsRequest.getProductRequest().getPricePerBaseUnit());
-        product.setQuantity(updateProductProductUnitsRequest.getProductRequest().getQuantity());
+        product.setQuantity(new BigDecimal(updateProductProductUnitsRequest.getProductRequest().getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue());
         product.setBaseUnit(updateProductProductUnitsRequest.getProductRequest().getBaseUnit());
         product.setCategory(category);
         Product saveProduct = productRepository.save(product);
@@ -142,7 +143,7 @@ public class ProductService {
         if(newQuantity == 0.0){
             product.setStatus(Status.INACTIVE.toString());
         }
-        product.setQuantity(newQuantity);
+        product.setQuantity(new BigDecimal(newQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
         productRepository.save(product);
         Account account = accountService.getUseLogin();
         ProductHistory productHistory =  ProductHistory.builder()
@@ -213,15 +214,6 @@ public class ProductService {
         notificationController.sendNotification();
         return product;
     }
-
-//    public Map<Long, String> getProductNameById(List<Long> listId) {
-//        Map<Long, String> mapName = new HashMap<>();
-//        for (Long id : listId) {
-//            ProductDetail pd = productDetailRepository.findById(id).get();
-//            mapName.put(id, pd.getProduct().getName());
-//        }
-//        return mapName;
-//    }
 
     public List<ProductResponse> findProductRequests() {
         return productRepository.findProductRequests();

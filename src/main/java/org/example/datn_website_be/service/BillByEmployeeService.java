@@ -78,7 +78,7 @@ public class BillByEmployeeService {
                     double quantityProduct = productDetail.getQuantity();
                     //Cộng sô lượng sản phẩm
                     quantityProduct = quantityProduct + billDetail.getQuantity();
-                    productDetail.setQuantity(quantityProduct);
+                    productDetail.setQuantity(new BigDecimal(quantityProduct).setScale(2, RoundingMode.CEILING).doubleValue());
                     //Cập nhật lại sản phẩm
                     productRepository.save(productDetail);
                 }
@@ -645,7 +645,7 @@ public class BillByEmployeeService {
                     BillDetail billDetail = new BillDetail();
                     billDetail.setProduct(productOptional.get());
                     billDetail.setBill(saveBill);
-                    billDetail.setQuantity(request.getQuantityCartDetail());
+                    billDetail.setQuantity(new BigDecimal(request.getQuantityCartDetail()).setScale(2, RoundingMode.FLOOR) .doubleValue());
                     billDetail.setStatus(Status.PENDING.toString());
                     //Áp dụng giá sale
                     billDetail.setPriceDiscount(promotionPrice);
@@ -655,7 +655,7 @@ public class BillByEmployeeService {
                     double newPromotionQuantity = quantityProductPromotion - request.getQuantityCartDetail();
 
                     //Cập nhật số lượng cho sản phẩm sale
-                    promotionDetail.get().setQuantity(newPromotionQuantity);
+                    promotionDetail.get().setQuantity(new BigDecimal(newPromotionQuantity).setScale(2, RoundingMode.FLOOR) .doubleValue());
 
                     //Cập nhận lại số lượng giảm giá
                     if (newPromotionQuantity <= 0) {
@@ -670,7 +670,7 @@ public class BillByEmployeeService {
                     BillDetail billDetailSale = new BillDetail();
                     billDetailSale.setProduct(productOptional.get());
                     billDetailSale.setBill(saveBill);
-                    billDetailSale.setQuantity(quantityProductPromotion);
+                    billDetailSale.setQuantity(new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR) .doubleValue());
                     billDetailSale.setStatus(Status.PENDING.toString());
                     billDetailSale.setPriceDiscount(promotionPrice);
                     billDetailRepository.save(billDetailSale);
@@ -678,7 +678,7 @@ public class BillByEmployeeService {
                         BillDetail billDetail = new BillDetail();
                         billDetail.setProduct(productOptional.get());
                         billDetail.setBill(saveBill);
-                        billDetail.setQuantity(retailQuantity);
+                        billDetail.setQuantity(new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR) .doubleValue());
                         billDetail.setStatus(Status.PENDING.toString());
                         billDetail.setPriceDiscount(priceProduct);
                         billDetailRepository.save(billDetail);
@@ -696,7 +696,7 @@ public class BillByEmployeeService {
                 BillDetail billDetail = new BillDetail();
                 billDetail.setProduct(productOptional.get());
                 billDetail.setBill(saveBill);
-                billDetail.setQuantity(request.getQuantityCartDetail());
+                billDetail.setQuantity(new BigDecimal(request.getQuantityCartDetail()).setScale(2, RoundingMode.FLOOR) .doubleValue());
                 billDetail.setStatus(Status.PENDING.toString());
                 //Áp dụng giá gốc của sản phẩm
                 billDetail.setPriceDiscount(productOptional.get().getPricePerBaseUnit());
@@ -798,7 +798,7 @@ public class BillByEmployeeService {
                     BillDetail billDetail = new BillDetail();
                     billDetail.setProduct(product);
                     billDetail.setBill(saveBill);
-                    billDetail.setQuantity(request.getQuantity());
+                    billDetail.setQuantity(new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR) .doubleValue());
                     billDetail.setStatus(Status.PENDING.toString());
                     //Áp dụng giá sale
                     billDetail.setPriceDiscount(promotionPrice);
@@ -808,7 +808,7 @@ public class BillByEmployeeService {
                     double newPromotionQuantity = quantityProductPromotion - request.getQuantity();
 
                     //Cập nhật số lượng cho sản phẩm sale
-                    promotionDetail.get().setQuantity(newPromotionQuantity);
+                    promotionDetail.get().setQuantity(new BigDecimal(newPromotionQuantity).setScale(2, RoundingMode.FLOOR) .doubleValue());
 
                     //Cập nhận lại số lượng giảm giá
                     if (newPromotionQuantity <= 0) {
@@ -824,7 +824,7 @@ public class BillByEmployeeService {
                     BillDetail billDetailSale = new BillDetail();
                     billDetailSale.setProduct(product);
                     billDetailSale.setBill(saveBill);
-                    billDetailSale.setQuantity(quantityProductPromotion);
+                    billDetailSale.setQuantity(new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR) .doubleValue());
                     billDetailSale.setStatus(Status.PENDING.toString());
                     billDetailSale.setPriceDiscount(promotionPrice);
                     billDetailRepository.save(billDetailSale);
@@ -832,7 +832,7 @@ public class BillByEmployeeService {
                         BillDetail billDetail = new BillDetail();
                         billDetail.setProduct(product);
                         billDetail.setBill(saveBill);
-                        billDetail.setQuantity(retailQuantity);
+                        billDetail.setQuantity(new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR) .doubleValue());
                         billDetail.setStatus(Status.PENDING.toString());
                         billDetail.setPriceDiscount(priceProduct);
                         billDetailRepository.save(billDetail);
@@ -851,7 +851,7 @@ public class BillByEmployeeService {
                 BillDetail billDetail = new BillDetail();
                 billDetail.setProduct(product);
                 billDetail.setBill(saveBill);
-                billDetail.setQuantity(request.getQuantity());
+                billDetail.setQuantity(new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR) .doubleValue());
                 billDetail.setStatus(Status.PENDING.toString());
                 //Áp dụng giá gốc của sản phẩm
                 billDetail.setPriceDiscount(product.getPricePerBaseUnit());
