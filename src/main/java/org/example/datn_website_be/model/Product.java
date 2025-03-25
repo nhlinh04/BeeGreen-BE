@@ -64,4 +64,9 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product")
     @JsonIgnore
     private List<PromotionDetail> promotionDetails;
+
+    @JsonIgnore
+    @JsonManagedReference(value = "productBatchesReference")
+    @OneToMany(mappedBy = "product")
+    private List<Batches> batches;
 }

@@ -46,6 +46,10 @@ public class BillDetailService {
     AccountService accountService;
     @Autowired
     NotificationController notificationController;
+    @Autowired
+    BatchesService batchesService;
+    @Autowired
+    BillDetailBatchesRepository billDetailBatchesRepository;
     private static final BigDecimal SHIPPING_PRICE = BigDecimal.valueOf(30000);
 
     public Page<BillDetailResponse> getBillDetails(Specification<BillDetail> spec, Pageable pageable) {
@@ -130,7 +134,19 @@ public class BillDetailService {
                         BillDetail existingBillDetail = billDetailOptional.get();
                         existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + request.getQuantity());
                         existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
-                        billDetailRepository.save(existingBillDetail);
+                        BillDetail detail = billDetailRepository.save(existingBillDetail);
+                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        for(Batches batches: batchesList){
+                            Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,detail);
+                            if (billDetailBatches.isEmpty()){
+                                BillDetailBatches detailBatches = BillDetailBatches.builder()
+                                        .batches(batches)
+                                        .billDetail(detail)
+                                        .build();
+                                billDetailBatchesRepository.save(detailBatches);
+                            }
+                        }
+
                     } else {
                         //Chưa tồn tại sẽ tạo hóa đơn chi tiết mới
                         // Tạo hóa đơn chi tiết mới
@@ -142,7 +158,16 @@ public class BillDetailService {
                         billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                         //Áp dụng giá sale
                         billDetail.setPriceDiscount(promotionPrice);
-                        billDetailRepository.save(billDetail);
+
+                        BillDetail detail = billDetailRepository.save(billDetail);
+                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        for(Batches batches: batchesList){
+                            BillDetailBatches detailBatches = BillDetailBatches.builder()
+                                    .batches(batches)
+                                    .billDetail(detail)
+                                    .build();
+                            billDetailBatchesRepository.save(detailBatches);
+                        }
                     }
                     //Số lượng còn lại của sản phẩm sale
                     double newPromotionQuantity = quantityProductPromotion - request.getQuantity();
@@ -173,9 +198,20 @@ public class BillDetailService {
                     if (billDetailWithDiscount.isPresent()) {
                         // Nếu hóa đơn chi tiết với giá sale đã tồn tại, cập nhật số lượng
                         BillDetail existingBillDetail = billDetailWithDiscount.get();
-                        existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + request.getQuantity());
+                        existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + quantityProductPromotion);
                         existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + quantityProductPromotion).setScale(2, RoundingMode.FLOOR).doubleValue());
-                        billDetailRepository.save(existingBillDetail);
+                        BillDetail detail = billDetailRepository.save(existingBillDetail);
+                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        for(Batches batches: batchesList){
+                            Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,detail);
+                            if (billDetailBatches.isEmpty()){
+                                BillDetailBatches detailBatches = BillDetailBatches.builder()
+                                        .batches(batches)
+                                        .billDetail(detail)
+                                        .build();
+                                billDetailBatchesRepository.save(detailBatches);
+                            }
+                        }
                     } else {
                         // Nếu chưa tồn tại, tạo hóa đơn chi tiết mới với giá sale
                         BillDetail billDetail = new BillDetail();
@@ -185,7 +221,15 @@ public class BillDetailService {
                         billDetail.setQuantity(new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR).doubleValue());
                         billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                         billDetail.setPriceDiscount(promotionPrice);
-                        billDetailRepository.save(billDetail);
+                        BillDetail detail = billDetailRepository.save(billDetail);
+                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        for(Batches batches: batchesList){
+                            BillDetailBatches detailBatches = BillDetailBatches.builder()
+                                    .batches(batches)
+                                    .billDetail(detail)
+                                    .build();
+                            billDetailBatchesRepository.save(detailBatches);
+                        }
                     }
 
                     // Xử lý cho sản phẩm bán lẻ với giá gốc
@@ -193,9 +237,20 @@ public class BillDetailService {
                         if (billDetailWithOriginalPrice.isPresent()) {
                             // Nếu hóa đơn chi tiết với giá gốc đã tồn tại, cập nhật số lượng
                             BillDetail existingBillDetail = billDetailWithOriginalPrice.get();
-                            existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + request.getQuantity());
+                            existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + retailQuantity);
                             existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + retailQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
-                            billDetailRepository.save(existingBillDetail);
+                            BillDetail detail = billDetailRepository.save(existingBillDetail);
+                            List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
+                            for(Batches batches: batchesList){
+                                Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,detail);
+                                if (billDetailBatches.isEmpty()){
+                                    BillDetailBatches detailBatches = BillDetailBatches.builder()
+                                            .batches(batches)
+                                            .billDetail(detail)
+                                            .build();
+                                    billDetailBatchesRepository.save(detailBatches);
+                                }
+                            }
                         } else {
                             // Nếu chưa tồn tại, tạo hóa đơn chi tiết mới với giá gốc
                             BillDetail billDetail = new BillDetail();
@@ -205,7 +260,15 @@ public class BillDetailService {
                             billDetail.setQuantity(new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
                             billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                             billDetail.setPriceDiscount(priceProduct);
-                            billDetailRepository.save(billDetail);
+                            BillDetail detail = billDetailRepository.save(billDetail);
+                            List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
+                            for(Batches batches: batchesList){
+                                BillDetailBatches detailBatches = BillDetailBatches.builder()
+                                        .batches(batches)
+                                        .billDetail(detail)
+                                        .build();
+                                billDetailBatchesRepository.save(detailBatches);
+                            }
                         }
                     }
 
@@ -226,7 +289,18 @@ public class BillDetailService {
                     BillDetail existingBillDetail = billDetailOptional.get();
                     existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + request.getQuantity());
                     existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
-                    billDetailRepository.save(existingBillDetail);
+                    BillDetail detail = billDetailRepository.save(existingBillDetail);
+                    List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(existingBillDetail.getQuantity() + request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                    for(Batches batches: batchesList){
+                        Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,detail);
+                        if (billDetailBatches.isEmpty()){
+                            BillDetailBatches detailBatches = BillDetailBatches.builder()
+                                    .batches(batches)
+                                    .billDetail(detail)
+                                    .build();
+                            billDetailBatchesRepository.save(detailBatches);
+                        }
+                    }
                 } else {
                     //Nếu không tồn tại sẽ tạo hóa đơn mới
                     // Tạo hóa đơn chi tiết mới
@@ -238,7 +312,15 @@ public class BillDetailService {
                     billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                     //Áp dụng giá gốc của sản phẩm
                     billDetail.setPriceDiscount(product.getPricePerBaseUnit());
-                    billDetailRepository.save(billDetail);
+                    BillDetail detail = billDetailRepository.save(billDetail);
+                    List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                    for(Batches batches: batchesList){
+                        BillDetailBatches detailBatches = BillDetailBatches.builder()
+                                .batches(batches)
+                                .billDetail(detail)
+                                .build();
+                        billDetailBatchesRepository.save(detailBatches);
+                    }
                 }
             }
             //Số lượng còn lại của sản phẩm
@@ -332,7 +414,8 @@ public class BillDetailService {
                             throw new RuntimeException("Hiện tại đã có " + existingBillDetail.getQuantity() + " trong hóa đơn!");
                         }
                         existingBillDetail.setQuantity(newQuantityBill);
-                        billDetailRepository.save(existingBillDetail);
+                        BillDetail detail = billDetailRepository.save(existingBillDetail);
+
 
                     } else {
                         //Chưa tồn tại sẽ tạo hóa đơn chi tiết mới
@@ -344,7 +427,7 @@ public class BillDetailService {
                         billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                         //Áp dụng giá sale
                         billDetail.setPriceDiscount(promotionPrice);
-                        billDetailRepository.save(billDetail);
+                        BillDetail detail = billDetailRepository.save(billDetail);
                     }
                     //Số lượng còn lại của sản phẩm sale
                     double newPromotionQuantity = quantityProductPromotion - request.getQuantity();
@@ -388,7 +471,7 @@ public class BillDetailService {
                         // Nếu hóa đơn chi tiết với giá sale đã tồn tại, cập nhật số lượng
                         BillDetail existingBillDetail = billDetailWithDiscount.get();
                         existingBillDetail.setQuantity(existingBillDetail.getQuantity() + quantityProductPromotion);
-                        billDetailRepository.save(existingBillDetail);
+                        BillDetail detail = billDetailRepository.save(existingBillDetail);
                     } else {
                         // Nếu chưa tồn tại, tạo hóa đơn chi tiết mới với giá sale
                         BillDetail billDetail = new BillDetail();
@@ -397,7 +480,7 @@ public class BillDetailService {
                         billDetail.setQuantity(quantityProductPromotion);
                         billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                         billDetail.setPriceDiscount(promotionPrice);
-                        billDetailRepository.save(billDetail);
+                        BillDetail detail = billDetailRepository.save(billDetail);
                     }
                     bill.setTotalMerchandise(
                             bill.getTotalMerchandise().add(
@@ -410,7 +493,7 @@ public class BillDetailService {
                             // Nếu hóa đơn chi tiết với giá gốc đã tồn tại, cập nhật số lượng
                             BillDetail existingBillDetail = billDetailWithOriginalPrice.get();
                             existingBillDetail.setQuantity(existingBillDetail.getQuantity() + retailQuantity);
-                            billDetailRepository.save(existingBillDetail);
+                            BillDetail detail = billDetailRepository.save(existingBillDetail);
                         } else {
                             // Nếu chưa tồn tại, tạo hóa đơn chi tiết mới với giá gốc
                             BillDetail billDetail = new BillDetail();
@@ -419,7 +502,7 @@ public class BillDetailService {
                             billDetail.setQuantity(retailQuantity);
                             billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                             billDetail.setPriceDiscount(priceProduct);
-                            billDetailRepository.save(billDetail);
+                            BillDetail detail = billDetailRepository.save(billDetail);
                         }
                         bill.setTotalMerchandise(
                                 bill.getTotalMerchandise().add(
@@ -448,7 +531,7 @@ public class BillDetailService {
                         throw new RuntimeException("Hiện tại đã có " + existingBillDetail.getQuantity() + " trong hóa đơn!");
                     }
                     existingBillDetail.setQuantity(newQuantityBill);
-                    billDetailRepository.save(existingBillDetail);
+                    BillDetail detail = billDetailRepository.save(existingBillDetail);
                 } else {
                     //Nếu không tồn tại sẽ tạo hóa đơn mới
                     // Tạo hóa đơn chi tiết mới
@@ -459,7 +542,7 @@ public class BillDetailService {
                     billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                     //Áp dụng giá gốc của sản phẩm
                     billDetail.setPriceDiscount(productOptional.get().getPricePerBaseUnit());
-                    billDetailRepository.save(billDetail);
+                    BillDetail detail = billDetailRepository.save(billDetail);
                 }
                 bill.setTotalMerchandise(
                         bill.getTotalMerchandise().add(
@@ -535,6 +618,17 @@ public class BillDetailService {
             productRepository.save(product);
             billDetail.setActualQuantity(request.getActualQuantity());
             billDetailRepository.save(billDetail);
+            List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getActualQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+            for(Batches batches: batchesList){
+                Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,billDetail);
+                if (billDetailBatches.isEmpty()){
+                    BillDetailBatches detailBatches = BillDetailBatches.builder()
+                            .batches(batches)
+                            .billDetail(billDetail)
+                            .build();
+                    billDetailBatchesRepository.save(detailBatches);
+                }
+            }
         }
 
     }

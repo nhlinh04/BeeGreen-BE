@@ -25,8 +25,6 @@ public class ProductRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "Giá phải lớn hơn 0")
     private BigDecimal pricePerBaseUnit;
 
-    @NotNull(message = "Số lượng không được để trống")
-    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
     private double quantity;
 
     @NotBlank(message = "Tên đơn vị gốc không được để trống")

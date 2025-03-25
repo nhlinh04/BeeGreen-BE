@@ -4,46 +4,41 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "BillDetail")
+@Table(name = "Batches")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BillDetail extends BaseEntity {
-
+@Builder
+public class Batches extends BaseEntity{
     @Column
     private double quantity;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column
-    private double actualQuantity;
+    private Date NSX;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column
+    private Date HSD;
 
     @Column
-    private BigDecimal priceDiscount;
+    private String code;
 
-    @Column
-    private String note;
-
-    @JsonBackReference(value = "billBillDetailReference")
-    @ManyToOne
-    @JoinColumn(name = "id_bill", referencedColumnName = "id")
-    private Bill bill;
-
-    @JsonBackReference(value = "productBillDetailReference")
+    @JsonBackReference(value = "productBatchesReference")
     @ManyToOne
     @JoinColumn(name = "id_product", referencedColumnName = "id")
     private Product product;
 
     @JsonIgnore
     @JsonManagedReference(value = "billDetailBatchesBatchesReference")
-    @OneToMany(mappedBy = "billDetail")
+    @OneToMany(mappedBy = "batches")
     private List<BillDetailBatches> billDetailBatches;
 }
