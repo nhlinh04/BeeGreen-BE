@@ -3,14 +3,8 @@ package org.example.datn_website_be.service;
 import org.example.datn_website_be.Enum.Status;
 import org.example.datn_website_be.dto.response.BillDetailOrderResponse;
 import org.example.datn_website_be.dto.response.ProductPromotionResponse;
-import org.example.datn_website_be.model.Bill;
-import org.example.datn_website_be.model.BillDetail;
-import org.example.datn_website_be.model.Product;
-import org.example.datn_website_be.model.PromotionDetail;
-import org.example.datn_website_be.repository.BillDetailByEmployeeRepository;
-import org.example.datn_website_be.repository.BillRepository;
-import org.example.datn_website_be.repository.ProductRepository;
-import org.example.datn_website_be.repository.PromotionDetailRepository;
+import org.example.datn_website_be.model.*;
+import org.example.datn_website_be.repository.*;
 import org.example.datn_website_be.webconfig.NotificationController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +25,10 @@ public class BillDetailByEmployeeService {
     ProductRepository productRepository;
     @Autowired
     BillRepository billRepository;
+    @Autowired
+    BatchesService batchesService;
+    @Autowired
+    BillDetailBatchesRepository billDetailBatchesRepository;
     @Autowired
     NotificationController notificationController;
 
@@ -56,6 +54,7 @@ public class BillDetailByEmployeeService {
             throw new RuntimeException("Sản phẩm " + productPromotionResponse.getNameProduct() + " đã hết hàng");
         }
         double newQuantity = product.getQuantity() - 1;
+
         product.setQuantity(newQuantity);
         if (newQuantity <= 0) {
             product.setStatus(Status.INACTIVE.toString());
@@ -70,6 +69,7 @@ public class BillDetailByEmployeeService {
         billDetail.setActualQuantity(billDetail.getQuantity() + 1);
         billDetail.setQuantity(billDetail.getQuantity() + 1);
         BillDetail updateBillDetail = billDetailByEmployeeRepository.save(billDetail);
+        batchesService.subtractBatches(product,new BigDecimal(1).setScale(2, RoundingMode.FLOOR).doubleValue());
         notificationController.sendNotification();
         return updateBillDetail;
     }
@@ -92,6 +92,8 @@ public class BillDetailByEmployeeService {
 
         productRepository.save(product);
         BillDetail updateBillDetail = billDetailByEmployeeRepository.save(billDetail);
+
+//        batchesService.plusBatches();
         notificationController.sendNotification();
         return updateBillDetail;
     }

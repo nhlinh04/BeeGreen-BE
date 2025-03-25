@@ -1,0 +1,32 @@
+package org.example.datn_website_be.repository;
+
+import org.example.datn_website_be.model.Account;
+import org.example.datn_website_be.model.Batches;
+import org.example.datn_website_be.model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface BatchesRepository extends JpaRepository<Batches, Long> {
+    @Query("""
+            select b from Batches b
+            join b.product p
+            where b.status =:status 
+            and p.id =:id
+            and b.quantity > 0
+            order by b.HSD asc
+            """)
+    List<Batches> findByProductAndStatus(Long id, String status);
+
+    @Query("""
+            select b from Batches b
+            join b.product p
+            join b.billDetailBatches bdb
+            join bdb.billDetail bd
+            where p.id=:idProduct and bd.id=:idBillDetail
+                """)
+    List<Batches> findBatches();
+}

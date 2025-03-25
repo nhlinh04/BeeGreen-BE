@@ -70,7 +70,7 @@ public class ProductService {
                 .name(productRequest.getName())
                 .baseUnit(productRequest.getBaseUnit())
                 .pricePerBaseUnit(productRequest.getPricePerBaseUnit())
-                .quantity(new BigDecimal(productRequest.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue())
+//                .quantity(new BigDecimal(productRequest.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue())
                 .category(category)
                 .build();
         product.setStatus(Status.ACTIVE.toString());
@@ -106,7 +106,7 @@ public class ProductService {
         }
         product.setName(updateProductProductUnitsRequest.getProductRequest().getName());
         product.setPricePerBaseUnit(updateProductProductUnitsRequest.getProductRequest().getPricePerBaseUnit());
-        product.setQuantity(new BigDecimal(updateProductProductUnitsRequest.getProductRequest().getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue());
+//        product.setQuantity(new BigDecimal(updateProductProductUnitsRequest.getProductRequest().getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue());
         product.setBaseUnit(updateProductProductUnitsRequest.getProductRequest().getBaseUnit());
         product.setCategory(category);
         Product saveProduct = productRepository.save(product);
