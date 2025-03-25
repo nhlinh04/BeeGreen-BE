@@ -36,6 +36,8 @@ public class BillService {
      BillDetailRepository billDetailRepository;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    BatchesService batchesService;
     public List<BillStatisticalPieResponse> getCompletedBillStatistics() {
         List<Object[]> results = billRepository.findCompletedBillStatisticsByYear();
         List<BillStatisticalPieResponse> statistics = new ArrayList<>();
@@ -89,46 +91,10 @@ public class BillService {
     }
 
 
-    public Bill createBill(Bill bill) {
-        return billRepository.save(bill);
-    }
 
 
     public Page<BillResponse> getBills(Specification<Bill> spec, Pageable pageable) {
         return billRepository.findAll(spec, pageable).map(this::convertToBillResponse);
-    }
-
-    // Update an existing Bill
-    public Bill updateBill(Long id, Bill bill) {
-        Bill existingBill = billRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bill not found"));
-
-
-        String[] ignoredProperties = {"id", "createdAt", "createdBy"};
-        BeanUtils.copyProperties(bill, existingBill, ignoredProperties);
-
-
-        if (bill.getVoucher() != null) {
-            existingBill.setVoucher(bill.getVoucher());
-        }
-        if (bill.getCustomer() != null) {
-            existingBill.setCustomer(bill.getCustomer());
-        }
-        if (bill.getEmployees() != null) {
-            existingBill.setEmployees(bill.getEmployees());
-        }
-
-        if (bill.getPayBills() != null) {
-            existingBill.setPayBills(bill.getPayBills());
-        }
-        if (bill.getBillHistories() != null) {
-            existingBill.setBillHistories(bill.getBillHistories());
-        }
-        if (bill.getBillDetails() != null) {
-            existingBill.setBillDetails(bill.getBillDetails());
-        }
-
-        return billRepository.save(existingBill);
     }
 
 
@@ -224,6 +190,7 @@ public class BillService {
                     //Cộng số lượng sản phẩm
                     quantityProductDetail = quantityProductDetail + billDetail.getQuantity();
                     product.setQuantity(new BigDecimal(quantityProductDetail).setScale(2, RoundingMode.FLOOR).doubleValue());
+                    batchesService.plusBatches(billDetail.getId(),product.getId());
                 }
             }
             //Cập nhật lại sản phẩm

@@ -2,6 +2,7 @@ package org.example.datn_website_be.service;
 
 import org.example.datn_website_be.Enum.Status;
 import org.example.datn_website_be.dto.request.BatchesRequest;
+import org.example.datn_website_be.dto.response.BatchesBillRespnse;
 import org.example.datn_website_be.model.Account;
 import org.example.datn_website_be.model.Batches;
 import org.example.datn_website_be.model.Product;
@@ -31,13 +32,14 @@ public class BatchesService {
     AccountService accountService;
     @Autowired
     public ProductHistoryRepository productHistoryRepository;
+
     @Transactional
     public void createBatches(BatchesRequest batchesRequest) {
         if (batchesRequest.getIdProduct() == null) {
             throw new RuntimeException("ID sản phẩm không được để trống");
         }
         Product product = productRepository.findById(batchesRequest.getIdProduct())
-                .orElseThrow(() -> new RuntimeException("Sản phẩm với ID "+batchesRequest.getIdProduct()+"không tìm thấy!"));
+                .orElseThrow(() -> new RuntimeException("Sản phẩm với ID " + batchesRequest.getIdProduct() + "không tìm thấy!"));
         String code = "CODE" + randomPassword.getPassword();
         Batches batches = Batches.builder()
                 .product(product)
@@ -52,17 +54,18 @@ public class BatchesService {
         productRepository.save(product);
         batchesRepository.save(batches);
         Account account = accountService.getUseLogin();
-        ProductHistory productHistory =  ProductHistory.builder()
-                .note(account.getEmail()+" đã thêm "+
-                        (new BigDecimal(product.getQuantity() + batchesRequest.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue())+
-                        " "+
-                        product.getBatches()+" mới"
+        ProductHistory productHistory = ProductHistory.builder()
+                .note(account.getEmail() + " đã thêm " +
+                        (new BigDecimal(product.getQuantity() + batchesRequest.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue()) +
+                        " " +
+                        product.getBaseUnit() + " mới"
                 )
                 .account(account)
                 .product(product)
                 .build();
         productHistoryRepository.save(productHistory);
     }
+
     @Transactional
     public List<Batches> subtractBatches(Product product, double quantity) {
         List<Batches> batchesList = batchesRepository.findByProductAndStatus(product.getId(), Status.ACTIVE.toString());
@@ -88,11 +91,15 @@ public class BatchesService {
         }
         return batchesArrayList;
     }
-    @Transactional
-    public void plusBatches(Long idBillDetail, Long id, double quantity) {
 
-//        Batches batches = batchesRepository.findById(idBatches)
-//                .orElseThrow(() ->new RuntimeException("Không tìm thấy kho hàng"));
-//        batches.setQuantity(new BigDecimal(batches.getQuantity() + quantity).setScale(2, RoundingMode.CEILING).doubleValue());
+    @Transactional
+    public void plusBatches(Long idBillDetail, Long idProduct) {
+        List<BatchesBillRespnse> batchesBillRespnseList = batchesRepository.findBatches(idProduct, idBillDetail);
+        for (BatchesBillRespnse batchesBillRespnse : batchesBillRespnseList) {
+            Batches batches = batchesRepository.findById(batchesBillRespnse.getIdBatches())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy lô sản phẩm"));
+            batches.setQuantity(new BigDecimal(batches.getQuantity() + batchesBillRespnse.getQuantityBillDetailBatches()).setScale(2, RoundingMode.CEILING).doubleValue());
+            batchesRepository.save(batches);
+        }
     }
 }

@@ -48,6 +48,8 @@ public class BillByEmployeeService {
     @Autowired
     PromotionDetailRepository promotionDetailRepository;
     @Autowired
+    BatchesService batchesService;
+    @Autowired
     NotificationController notificationController;
     //Lấy tối đa 5 phần tử
     private static final int MAX_DISPLAY_BILLS = 5;
@@ -73,14 +75,15 @@ public class BillByEmployeeService {
                     if (!productOptional.isPresent()) {
                         throw new RuntimeException("Tài nguyên sản phẩm không tồn tại trong hệ thống.");
                     }
-                    Product productDetail = productOptional.get();
+                    Product product = productOptional.get();
                     //Số lượng sản phẩm của sản phẩm
-                    double quantityProduct = productDetail.getQuantity();
+                    double quantityProduct = product.getQuantity();
                     //Cộng sô lượng sản phẩm
                     quantityProduct = quantityProduct + billDetail.getQuantity();
-                    productDetail.setQuantity(new BigDecimal(quantityProduct).setScale(2, RoundingMode.CEILING).doubleValue());
+                    product.setQuantity(new BigDecimal(quantityProduct).setScale(2, RoundingMode.CEILING).doubleValue());
+                    batchesService.plusBatches(billDetail.getId(),product.getId());
                     //Cập nhật lại sản phẩm
-                    productRepository.save(productDetail);
+                    productRepository.save(product);
                 }
                 //Xóa hóa đơn
                 billRepository.deleteById(bill.getId());
