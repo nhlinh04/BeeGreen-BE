@@ -93,7 +93,7 @@ public class BillDetailByEmployeeService {
         productRepository.save(product);
         BillDetail updateBillDetail = billDetailByEmployeeRepository.save(billDetail);
 
-//        batchesService.plusBatches();
+        batchesService.plusBatches(billDetail.getId(),product.getId());
         notificationController.sendNotification();
         return updateBillDetail;
     }
@@ -109,8 +109,10 @@ public class BillDetailByEmployeeService {
         product.setQuantity(newQuantity);
 
         productRepository.save(product);
-
+        batchesService.plusBatches(billDetail.getId(),product.getId());
+        billDetailBatchesRepository.deleteByBillDetail(billDetail);
         billDetailByEmployeeRepository.delete(billDetail);
+
         notificationController.sendNotification();
     }
 

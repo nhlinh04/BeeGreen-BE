@@ -8,11 +8,9 @@ import org.example.datn_website_be.service.BatchesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +33,30 @@ public class BatchesRestAPI {
             }
             batchesService.createBatches(batchesRequest);
             return ResponseEntity.ok("Nhập hàng thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(Response.builder()
+                            .status(HttpStatus.CONFLICT.toString())
+                            .mess(e.getMessage())
+                            .build()
+                    );
+        }
+    }
+
+    @GetMapping("/findBatchesByIdProduct")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
+    public ResponseEntity<?> findBatchesByIdProduct(@RequestParam(value = "idProduct", required = false) Long idProduct) {
+        try {
+            if (idProduct == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: ID của sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            return ResponseEntity.ok().body(batchesService.findBatchesByIdProduct(idProduct));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

@@ -246,7 +246,8 @@ public class ProductRestAPI {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getProductPriceRangeWithPromotion(
             @RequestParam(value = "idProduct", required = false) Long id,
-            @RequestParam(value = "quantity", required = false) double quantity
+            @RequestParam(value = "quantity", required = false) double quantity,
+            @RequestParam(value = "codeBatches", required = false) String codeBatches
     ) {
         try {
             if (id == null) {
@@ -254,6 +255,14 @@ public class ProductRestAPI {
                         Response.builder()
                                 .status(HttpStatus.BAD_REQUEST.toString())
                                 .mess("Lỗi: ID sản phẩm không được để trống!")
+                                .build()
+                );
+            }
+            if (codeBatches == null) {
+                return ResponseEntity.badRequest().body(
+                        Response.builder()
+                                .status(HttpStatus.BAD_REQUEST.toString())
+                                .mess("Lỗi: Mã sản phẩm không được để trống!")
                                 .build()
                 );
             }
@@ -265,7 +274,7 @@ public class ProductRestAPI {
                                 .build()
                 );
             }
-            productService.ExportProduct(id,quantity);
+            productService.ExportProduct(id,quantity,codeBatches);
             return ResponseEntity.ok("Xuất hủy thành công!");
         } catch (RuntimeException e) {
             return ResponseEntity

@@ -55,6 +55,8 @@ public class ProductService {
 
     @Autowired
     NotificationController notificationController;
+    @Autowired
+    BatchesService batchesService;
 
     @Transactional
     public void addProduct(ProductRequest productRequest) {
@@ -133,21 +135,23 @@ public class ProductService {
         productHistoryRepository.save(productHistory);
         notificationController.sendNotification();
     }
-    public void ExportProduct(Long id, double quantity) {
+    public void ExportProduct(Long id, double quantity,String codeBatches) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tài nguyên sản phẩm trong hệ thống!"));
-        if (quantity>product.getQuantity()){
+        if (quantity > product.getQuantity()){
             throw new RuntimeException("Số lượng hủy vượt quá số lượng sản phẩm");
         }
+
         double newQuantity = product.getQuantity() - quantity;
         if(newQuantity == 0.0){
             product.setStatus(Status.INACTIVE.toString());
         }
         product.setQuantity(new BigDecimal(newQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
         productRepository.save(product);
+        batchesService.ExportProductBatches(quantity,codeBatches);
         Account account = accountService.getUseLogin();
         ProductHistory productHistory =  ProductHistory.builder()
-                .note(account.getEmail()+" đã xuất hủy sản phẩm")
+                .note(account.getEmail()+" đã xuất hủy "+quantity+" "+product.getBaseUnit()+" sản phẩm")
                 .account(account)
                 .product(product)
                 .build();
