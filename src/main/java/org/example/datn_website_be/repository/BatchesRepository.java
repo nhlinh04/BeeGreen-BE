@@ -35,4 +35,17 @@ public interface BatchesRepository extends JpaRepository<Batches, Long> {
             order by b.HSD desc 
                 """)
     List<BatchesBillRespnse> findBatches(@Param("idProduct") Long idProduct, @Param("idBillDetail") Long idBillDetail);
+
+    @Query("""
+            select b
+            from Batches b
+            join b.product p
+            where p.id=:idProduct
+            order by b.createdAt desc 
+                """)
+    List<Batches> findByProductId(@Param("idProduct") Long idProduct);
+
+    Batches findByCode(String codeBatches);
+    @Query("SELECT b FROM Batches b WHERE b.HSD < CURRENT_DATE")
+    List<Batches> findByHSD();
 }

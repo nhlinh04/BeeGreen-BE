@@ -1,6 +1,7 @@
 package org.example.datn_website_be.auto;
 
 
+import org.example.datn_website_be.service.BatchesService;
 import org.example.datn_website_be.service.BillByEmployeeService;
 import org.example.datn_website_be.service.CartDetailService;
 import org.example.datn_website_be.service.PromotionService;
@@ -17,11 +18,14 @@ public class DiscountScheduler {
     private BillByEmployeeService billByEmployeeService;
     @Autowired
     private CartDetailService cartDetailService;
+    @Autowired
+    private BatchesService batchesService;
     @Scheduled(cron = "0 * * * * *")
     public void checkAndUpdateExpiredDiscounts() {
         promotionService.updateUpcomingDiscounts();
         promotionService.updateFinishedDiscounts();
         billByEmployeeService.findBillsOlder();
         cartDetailService.findCartDetailsOlderThanOneDay();
+        batchesService.findByHSD();
     }
 }
