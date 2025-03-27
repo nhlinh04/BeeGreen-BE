@@ -40,4 +40,8 @@ public class ProductRequest {
     @Size(min = 1, message = "Phải có ít nhất một giá trị quy đổi")
     private List<@Valid ProductUnitsRequest> productUnits;
 
+    @NotBlank(message = "Mô tả không được để trống")
+    @Size(max = 65535, message = "Mô tả quá dài")
+    private String description;
+
 }

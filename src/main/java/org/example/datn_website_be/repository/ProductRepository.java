@@ -18,14 +18,14 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
     @Query("select new org.example.datn_website_be.dto.response.ProductResponse(" +
-            "p.id, p.name,p.pricePerBaseUnit,p.quantity, p.baseUnit, c.id, c.name, p.status,p.createdAt" +
+            "p.id, p.name,p.pricePerBaseUnit,p.quantity, p.description, p.baseUnit, c.id, c.name, p.status,p.createdAt" +
             ")" +
             "from Product p " +
             "join p.category c")
     List<ProductResponse> findProductRequests();
 
     @Query("select new org.example.datn_website_be.dto.response.ProductResponse(" +
-            "p.id, p.name,p.pricePerBaseUnit,p.quantity, p.baseUnit, c.id, c.name, p.status,p.createdAt" +
+            "p.id, p.name,p.pricePerBaseUnit,p.quantity, p.description, p.baseUnit, c.id, c.name, p.status,p.createdAt" +
             ")" +
             "from Product p " +
             "join p.category c  where p.id=:id")

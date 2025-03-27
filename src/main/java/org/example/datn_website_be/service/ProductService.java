@@ -65,15 +65,16 @@ public class ProductService {
         if (category.getStatus().equals(Status.INACTIVE.toString())) {
             throw new RuntimeException("Danh mục " + category.getName() + " không còn hoạt động");
         }
-        if (productRequest.getListImages().isEmpty()) {
-            throw new RuntimeException("Danh sách hình ảnh không được để trống");
-        }
+//        if (productRequest.getListImages().isEmpty()) {
+//            throw new RuntimeException("Danh sách hình ảnh không được để trống");
+//        }
         Product product = Product.builder()
                 .name(productRequest.getName())
                 .baseUnit(productRequest.getBaseUnit())
                 .pricePerBaseUnit(productRequest.getPricePerBaseUnit())
 //                .quantity(new BigDecimal(productRequest.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue())
                 .category(category)
+                .description(productRequest.getDescription())
                 .build();
         product.setStatus(Status.ACTIVE.toString());
         Product saveProduct = productRepository.save(product);
@@ -111,6 +112,7 @@ public class ProductService {
 //        product.setQuantity(new BigDecimal(updateProductProductUnitsRequest.getProductRequest().getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue());
         product.setBaseUnit(updateProductProductUnitsRequest.getProductRequest().getBaseUnit());
         product.setCategory(category);
+        product.setDescription(updateProductProductUnitsRequest.getProductRequest().getDescription());
         Product saveProduct = productRepository.save(product);
         boolean checkProductDetail = productUnitsService.updateProductUnits(saveProduct, updateProductProductUnitsRequest.getProductRequest().getProductUnits());
         if (!checkProductDetail) {

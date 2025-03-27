@@ -26,6 +26,8 @@ public class ProductResponse {
 
     private double quantity;
 
+    private String description;
+
     private String baseUnit;
 
     private Long idCategory;

@@ -30,6 +30,9 @@ public class Product extends BaseEntity {
     @Column
     private String baseUnit;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @JsonBackReference(value = "categoryProductReference")
     @ManyToOne
     @JoinColumn(name = "id_category", referencedColumnName = "id")

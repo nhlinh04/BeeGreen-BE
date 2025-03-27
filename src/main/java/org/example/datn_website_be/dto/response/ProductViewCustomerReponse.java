@@ -30,4 +30,5 @@ public class ProductViewCustomerReponse {
 
     private BigDecimal priceSale;
 
+
 }
