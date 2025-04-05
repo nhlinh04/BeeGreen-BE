@@ -69,7 +69,7 @@ public class BillDetailByEmployeeService {
         billDetail.setActualQuantity(billDetail.getQuantity() + 1);
         billDetail.setQuantity(billDetail.getQuantity() + 1);
         BillDetail updateBillDetail = billDetailByEmployeeRepository.save(billDetail);
-        batchesService.subtractBatches(product,new BigDecimal(1).setScale(2, RoundingMode.FLOOR).doubleValue());
+        batchesService.subtractBatches(product,new BigDecimal(1).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
         notificationController.sendNotification();
         return updateBillDetail;
     }

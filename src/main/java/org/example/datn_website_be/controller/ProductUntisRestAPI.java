@@ -74,7 +74,7 @@ public class ProductUntisRestAPI {
                                 .build()
                 );
             }
-            return ResponseEntity.ok(productUnitsService.findProductUnitsById(id));
+            return ResponseEntity.ok(productUnitsService.findByProductIdAndType(id,type));
         } catch (RuntimeException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)

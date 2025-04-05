@@ -62,7 +62,7 @@ public class BillDetailService {
         response.setIdProduct(billDetail.getProduct().getId());
         response.setNameProduct(billDetail.getProduct().getName());
         response.setBaseUnit(billDetail.getProduct().getBaseUnit());
-        response.setQuantity(new BigDecimal(billDetail.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+        response.setQuantity(new BigDecimal(billDetail.getQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
         response.setStatus(billDetail.getStatus());
         response.setPriceDiscount(billDetail.getBill().getPriceDiscount());
         response.setTotalMerchandise(billDetail.getBill().getTotalMerchandise());
@@ -133,9 +133,9 @@ public class BillDetailService {
                         //Đã tồn tại sẽ công thêm số lượng
                         BillDetail existingBillDetail = billDetailOptional.get();
                         existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + request.getQuantity());
-                        existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + request.getQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                         BillDetail detail = billDetailRepository.save(existingBillDetail);
-                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                         for(Batches batches: batchesList){
                             Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,detail);
                             if (billDetailBatches.isEmpty()){
@@ -154,13 +154,13 @@ public class BillDetailService {
                         billDetail.setProduct(product);
                         billDetail.setBill(bill);
                         billDetail.setActualQuantity(request.getQuantity());
-                        billDetail.setQuantity(new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        billDetail.setQuantity(new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                         billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                         //Áp dụng giá sale
                         billDetail.setPriceDiscount(promotionPrice);
 
                         BillDetail detail = billDetailRepository.save(billDetail);
-                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                         for(Batches batches: batchesList){
                             BillDetailBatches detailBatches = BillDetailBatches.builder()
                                     .batches(batches)
@@ -173,7 +173,7 @@ public class BillDetailService {
                     double newPromotionQuantity = quantityProductPromotion - request.getQuantity();
 
                     //Cập nhật số lượng cho sản phẩm sale
-                    promotionDetail.get().setQuantity(new BigDecimal(newPromotionQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
+                    promotionDetail.get().setQuantity(new BigDecimal(newPromotionQuantity).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
 
                     //Cập nhận lại số lượng giảm giá
                     if (newPromotionQuantity <= 0) {
@@ -199,9 +199,9 @@ public class BillDetailService {
                         // Nếu hóa đơn chi tiết với giá sale đã tồn tại, cập nhật số lượng
                         BillDetail existingBillDetail = billDetailWithDiscount.get();
                         existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + quantityProductPromotion);
-                        existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + quantityProductPromotion).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + quantityProductPromotion).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                         BillDetail detail = billDetailRepository.save(existingBillDetail);
-                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                         for(Batches batches: batchesList){
                             Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,detail);
                             if (billDetailBatches.isEmpty()){
@@ -218,11 +218,11 @@ public class BillDetailService {
                         billDetail.setProduct(product);
                         billDetail.setBill(bill);
                         billDetail.setActualQuantity(quantityProductPromotion);
-                        billDetail.setQuantity(new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        billDetail.setQuantity(new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                         billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                         billDetail.setPriceDiscount(promotionPrice);
                         BillDetail detail = billDetailRepository.save(billDetail);
-                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR).doubleValue());
+                        List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(quantityProductPromotion).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                         for(Batches batches: batchesList){
                             BillDetailBatches detailBatches = BillDetailBatches.builder()
                                     .batches(batches)
@@ -238,9 +238,9 @@ public class BillDetailService {
                             // Nếu hóa đơn chi tiết với giá gốc đã tồn tại, cập nhật số lượng
                             BillDetail existingBillDetail = billDetailWithOriginalPrice.get();
                             existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + retailQuantity);
-                            existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + retailQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
+                            existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + retailQuantity).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                             BillDetail detail = billDetailRepository.save(existingBillDetail);
-                            List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
+                            List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                             for(Batches batches: batchesList){
                                 Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,detail);
                                 if (billDetailBatches.isEmpty()){
@@ -257,11 +257,11 @@ public class BillDetailService {
                             billDetail.setProduct(product);
                             billDetail.setBill(bill);
                             billDetail.setActualQuantity(retailQuantity);
-                            billDetail.setQuantity(new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
+                            billDetail.setQuantity(new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                             billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                             billDetail.setPriceDiscount(priceProduct);
                             BillDetail detail = billDetailRepository.save(billDetail);
-                            List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
+                            List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(retailQuantity).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                             for(Batches batches: batchesList){
                                 BillDetailBatches detailBatches = BillDetailBatches.builder()
                                         .batches(batches)
@@ -288,9 +288,9 @@ public class BillDetailService {
                     //Nếu có sẽ cộng số lượng mua
                     BillDetail existingBillDetail = billDetailOptional.get();
                     existingBillDetail.setActualQuantity(existingBillDetail.getQuantity() + request.getQuantity());
-                    existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                    existingBillDetail.setQuantity(new BigDecimal(existingBillDetail.getQuantity() + request.getQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                     BillDetail detail = billDetailRepository.save(existingBillDetail);
-                    List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(existingBillDetail.getQuantity() + request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                    List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(existingBillDetail.getQuantity() + request.getQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                     for(Batches batches: batchesList){
                         Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,detail);
                         if (billDetailBatches.isEmpty()){
@@ -308,12 +308,12 @@ public class BillDetailService {
                     billDetail.setProduct(product);
                     billDetail.setBill(bill);
                     billDetail.setActualQuantity(request.getQuantity());
-                    billDetail.setQuantity(new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                    billDetail.setQuantity(new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                     billDetail.setStatus(Status.WAITING_FOR_PAYMENT.toString());
                     //Áp dụng giá gốc của sản phẩm
                     billDetail.setPriceDiscount(product.getPricePerBaseUnit());
                     BillDetail detail = billDetailRepository.save(billDetail);
-                    List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                    List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                     for(Batches batches: batchesList){
                         BillDetailBatches detailBatches = BillDetailBatches.builder()
                                 .batches(batches)
@@ -326,7 +326,7 @@ public class BillDetailService {
             //Số lượng còn lại của sản phẩm
             double newProductQuantity = quantityProduct - request.getQuantity();
             //Cập nhật số lượng cho sản phẩm
-            product.setQuantity(new BigDecimal(newProductQuantity).setScale(2, RoundingMode.CEILING).doubleValue());
+            product.setQuantity(new BigDecimal(newProductQuantity).setScale(2, RoundingMode.CEILING).max(BigDecimal.ZERO).doubleValue());
             //Nếu số lượng <= 0 thì chuyển product sang trạng thái INACTIVE
             if (newProductQuantity <= 0) {
                 product.setStatus(Status.INACTIVE.toString());
@@ -614,11 +614,11 @@ public class BillDetailService {
             if (quantityProductDetail <= 0) {
                 product.setStatus(Status.INACTIVE.toString());
             }
-            product.setQuantity(new BigDecimal(quantityProductDetail).setScale(2, RoundingMode.FLOOR) .doubleValue());
+            product.setQuantity(new BigDecimal(quantityProductDetail).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
             productRepository.save(product);
             billDetail.setActualQuantity(request.getActualQuantity());
             billDetailRepository.save(billDetail);
-            List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getActualQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+            List<Batches> batchesList = batchesService.subtractBatches(product,new BigDecimal(request.getActualQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
             for(Batches batches: batchesList){
                 Optional<BillDetailBatches> billDetailBatches = billDetailBatchesRepository.findByBatchesAndBillDetail(batches,billDetail);
                 if (billDetailBatches.isEmpty()){
@@ -847,7 +847,7 @@ public class BillDetailService {
 
     private void updatePromotionDetail(PromotionDetail promotionDetail, int quantityToReduce) {
         double newQuantity = promotionDetail.getQuantity() - quantityToReduce;
-        promotionDetail.setQuantity(new BigDecimal(newQuantity).setScale(2, RoundingMode.FLOOR) .doubleValue());
+        promotionDetail.setQuantity(new BigDecimal(newQuantity).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).max(BigDecimal.ZERO).doubleValue());
         if (newQuantity <= 0) {
             promotionDetail.setStatus(Status.FINISHED.toString());
         }

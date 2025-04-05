@@ -189,7 +189,7 @@ public class BillService {
                 if(!statusNow.equals("PENDING")){
                     //Cộng số lượng sản phẩm
                     quantityProductDetail = quantityProductDetail + billDetail.getQuantity();
-                    product.setQuantity(new BigDecimal(quantityProductDetail).setScale(2, RoundingMode.FLOOR).doubleValue());
+                    product.setQuantity(new BigDecimal(quantityProductDetail).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                     batchesService.plusBatches(billDetail.getId(),product.getId());
                 }
             }
