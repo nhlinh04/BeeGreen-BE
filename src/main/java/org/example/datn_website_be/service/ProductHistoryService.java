@@ -12,6 +12,6 @@ public class ProductHistoryService {
     @Autowired
     public ProductHistoryRepository productHistoryRepository;
     public List<ProductHistory> findProductHistory(Long idProduct){
-        return productHistoryRepository.findByProductId(idProduct);
+        return productHistoryRepository.findByProductIdOrderByCreatedAtDesc(idProduct);
     }
 }

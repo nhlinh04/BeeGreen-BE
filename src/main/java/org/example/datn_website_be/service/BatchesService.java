@@ -37,10 +37,19 @@ public class BatchesService {
             for (Batches batches : batchesList){
                 Product product = productRepository.findById(batches.getProduct().getId())
                                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại!"));
-                product.setQuantity(new BigDecimal(product.getQuantity()-batches.getQuantity()).setScale(2, RoundingMode.FLOOR).doubleValue());
+                product.setQuantity(new BigDecimal(product.getQuantity() - batches.getQuantity()).max(BigDecimal.ZERO).setScale(2, RoundingMode.FLOOR).doubleValue());
                 batches.setQuantity(0.0);
                 batchesRepository.save(batches);
                 productRepository.save(product);
+                ProductHistory productHistory = ProductHistory.builder()
+                        .note(
+                                (new BigDecimal(batches.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue()) +
+                                " " +
+                                product.getBaseUnit() + " hủy do đã hết hạn"
+                        )
+                        .product(product)
+                        .build();
+                productHistoryRepository.save(productHistory);
             }
         }
     }
@@ -61,14 +70,14 @@ public class BatchesService {
                 .code(code)
                 .build();
         batches.setStatus(Status.ACTIVE.toString());
-        product.setQuantity(new BigDecimal(product.getQuantity() + batchesRequest.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue());
+        product.setQuantity(new BigDecimal(product.getQuantity() + batchesRequest.getQuantity()).setScale(2, RoundingMode.CEILING).max(BigDecimal.ZERO).doubleValue());
 
         productRepository.save(product);
         batchesRepository.save(batches);
         Account account = accountService.getUseLogin();
         ProductHistory productHistory = ProductHistory.builder()
                 .note(account.getEmail() + " đã thêm " +
-                        (new BigDecimal(product.getQuantity() + batchesRequest.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue()) +
+                        (new BigDecimal(batchesRequest.getQuantity()).setScale(2, RoundingMode.CEILING).max(BigDecimal.ZERO).doubleValue()) +
                         " " +
                         product.getBaseUnit() + " mới"
                 )
@@ -95,7 +104,7 @@ public class BatchesService {
                 quantity -= availableQuantity;
                 batches.setQuantity(0.0);
             } else {
-                batches.setQuantity(new BigDecimal(availableQuantity - quantity).setScale(2, RoundingMode.FLOOR).doubleValue());
+                batches.setQuantity(new BigDecimal(availableQuantity - quantity).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
                 quantity = 0; // Đã trừ hết số lượng cần giảm
             }
             batchesArrayList.add(batchesRepository.save(batches));
@@ -110,7 +119,7 @@ public class BatchesService {
         for (BatchesBillRespnse batchesBillRespnse : batchesBillRespnseList) {
             Batches batches = batchesRepository.findById(batchesBillRespnse.getIdBatches())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy lô sản phẩm"));
-            batches.setQuantity(new BigDecimal(batches.getQuantity() + batchesBillRespnse.getQuantityBillDetailBatches()).setScale(2, RoundingMode.CEILING).doubleValue());
+            batches.setQuantity(new BigDecimal(batches.getQuantity() + batchesBillRespnse.getQuantityBillDetailBatches()).setScale(2, RoundingMode.CEILING).max(BigDecimal.ZERO).doubleValue());
             batchesRepository.save(batches);
         }
     }

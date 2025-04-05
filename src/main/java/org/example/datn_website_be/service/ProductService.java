@@ -146,7 +146,7 @@ public class ProductService {
         if(newQuantity == 0.0){
             product.setStatus(Status.INACTIVE.toString());
         }
-        product.setQuantity(new BigDecimal(newQuantity).setScale(2, RoundingMode.FLOOR).doubleValue());
+        product.setQuantity(new BigDecimal(newQuantity).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
         productRepository.save(product);
         batchesService.ExportProductBatches(quantity,codeBatches);
         Account account = accountService.getUseLogin();
