@@ -33,22 +33,27 @@ public class BatchesService {
     @Transactional
     public void findByHSD() {
         List<Batches> batchesList = batchesRepository.findByHSD();
+        System.out.println("check HSD");
+        System.out.println(batchesList.size());
         if (!batchesList.isEmpty()) {
+            System.out.println("HSD");
             for (Batches batches : batchesList){
+                System.out.println(batches.getProduct().getName());
                 Product product = productRepository.findById(batches.getProduct().getId())
                                 .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại!"));
                 product.setQuantity(new BigDecimal(product.getQuantity() - batches.getQuantity()).max(BigDecimal.ZERO).setScale(2, RoundingMode.FLOOR).doubleValue());
-                batches.setQuantity(0.0);
-                batchesRepository.save(batches);
-                productRepository.save(product);
                 ProductHistory productHistory = ProductHistory.builder()
                         .note(
                                 (new BigDecimal(batches.getQuantity()).setScale(2, RoundingMode.CEILING).doubleValue()) +
-                                " " +
-                                product.getBaseUnit() + " hủy do đã hết hạn"
+                                        " " +
+                                        product.getBaseUnit() + " hủy do đã hết hạn"
                         )
                         .product(product)
                         .build();
+                batches.setQuantity(0.0);
+                batchesRepository.save(batches);
+                productRepository.save(product);
+
                 productHistoryRepository.save(productHistory);
             }
         }
