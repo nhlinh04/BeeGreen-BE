@@ -610,11 +610,11 @@ public class BillDetailService {
             if (request.getActualQuantity() > quantityProductDetail || quantityProductDetail <= 0) {
                 throw new RuntimeException("Sản phẩm " + product.getName() + " không đủ số lượng.");
             }
-            quantityProductDetail = quantityProductDetail - request.getActualQuantity();
+            quantityProductDetail = new BigDecimal(quantityProductDetail - request.getActualQuantity()).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue();
             if (quantityProductDetail <= 0) {
                 product.setStatus(Status.INACTIVE.toString());
             }
-            product.setQuantity(new BigDecimal(quantityProductDetail).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).doubleValue());
+            product.setQuantity(new BigDecimal(quantityProductDetail).setScale(2, RoundingMode.CEILING).max(BigDecimal.ZERO).doubleValue());
             productRepository.save(product);
             billDetail.setActualQuantity(request.getActualQuantity());
             billDetailRepository.save(billDetail);
@@ -647,7 +647,7 @@ public class BillDetailService {
         if ((billDetail.getPriceDiscount().setScale(0, RoundingMode.DOWN).compareTo(productPrice.setScale(0, RoundingMode.DOWN)) != 0)) {
             throw new RuntimeException("Sản phẩm với mức giá " + billDetail.getPriceDiscount() + " VND đã hết hàng!");
         }
-        billDetail.setQuantity(billDetail.getQuantity() + 1);
+        billDetail.setQuantity(new BigDecimal(billDetail.getQuantity() + 1).setScale(2, RoundingMode.CEILING).doubleValue());
         bill.setTotalMerchandise(bill.getTotalMerchandise().add(productPrice));
 
         if (productPromotionResponse.getValue() != null && productPromotionResponse.getValue() > 0) {
@@ -702,7 +702,7 @@ public class BillDetailService {
         ProductPromotionResponse productPromotionResponse = productRepository.findProductDetailByIdProduct(idProduct)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm với ID " + idProduct + " không tồn tại!"));
         // Cập nhật số lượng
-        double newQuantity = billDetail.getQuantity() - 1;
+        double newQuantity = new BigDecimal(billDetail.getQuantity() - 1).setScale(2, RoundingMode.CEILING).doubleValue();
         if (newQuantity <= 0) {
             throw new RuntimeException("Tối thiểu phải có 1 sản phẩm");
         }
@@ -846,7 +846,7 @@ public class BillDetailService {
     }
 
     private void updatePromotionDetail(PromotionDetail promotionDetail, int quantityToReduce) {
-        double newQuantity = promotionDetail.getQuantity() - quantityToReduce;
+        double newQuantity = new BigDecimal(promotionDetail.getQuantity() - quantityToReduce).setScale(2, RoundingMode.CEILING).doubleValue();
         promotionDetail.setQuantity(new BigDecimal(newQuantity).setScale(2, RoundingMode.FLOOR).max(BigDecimal.ZERO).max(BigDecimal.ZERO).doubleValue());
         if (newQuantity <= 0) {
             promotionDetail.setStatus(Status.FINISHED.toString());

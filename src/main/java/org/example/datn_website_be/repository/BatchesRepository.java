@@ -46,6 +46,8 @@ public interface BatchesRepository extends JpaRepository<Batches, Long> {
     List<Batches> findByProductId(@Param("idProduct") Long idProduct);
 
     Batches findByCode(String codeBatches);
-    @Query("SELECT b FROM Batches b WHERE b.HSD < CURRENT_DATE")
+    @Query(value = "SELECT * FROM batches b WHERE HSD < NOW() AND b.quantity > 0", nativeQuery = true)
     List<Batches> findByHSD();
+
+
 }
