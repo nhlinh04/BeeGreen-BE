@@ -36,7 +36,54 @@ public class AccountService {
     @Autowired
      RandomPasswordGeneratorService randomPassword;
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    
+
+    private String htmlTemplate = """
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+    <meta charset="UTF-8" />
+    <title>Chào mừng đến với GreenFarm</title>
+    <style>
+        body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; margin:0; padding:0; color:#2e3a2f;}
+        .container {max-width:600px; margin:30px auto; background:white; border-radius:12px; box-shadow:0 6px 18px rgba(50, 50, 93, 0.1); overflow:hidden;}
+        .header {background: linear-gradient(90deg, #4caf50 0%%, #ff9800 50%%, #673ab7 100%%); padding:20px; text-align:center; color:white; font-size:26px; font-weight:700;}
+        .banner-img {width:100%%; display:block; border-bottom:4px solid #4caf50;}
+        .content {padding:30px 35px; line-height:1.6; font-size:16px;}
+        .content p {margin:15px 0;}
+        ul {list-style-type:none; padding-left:0;}
+        li {font-weight:600; margin-bottom:8px;}
+        .btn {display:inline-block; background:#2e7d32; color:white !important; padding:12px 28px; margin:25px 0; border-radius:8px; text-decoration:none; font-weight:600; font-size:16px;}
+        .btn:hover {background:#1b4d20;}
+        .footer {font-size:14px; color:#555; text-align:center; padding:20px; background:#f9f9f9;}
+        a {color:#673ab7; text-decoration:none;}
+        a:hover {text-decoration:underline;}
+    </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">Chào mừng bạn đến với GreenFarm!</div>
+            <img class="banner-img" src="https://img.pikbest.com/origin/06/06/45/807pIkbEsTePT.jpg!w700wp" alt="GreenFarm Rau củ tươi sạch" />
+            <div class="content">
+                <p>Kính chào Quý khách hàng,</p>
+                <p>Cảm ơn bạn đã đăng ký tài khoản tại <strong>GreenFarm</strong> – nơi cung cấp rau xanh tươi sạch, an toàn và đa dạng.</p>
+                <p>Thông tin tài khoản của bạn:</p>
+                <ul>
+                    <li>Tên tài khoản: <strong>%s</strong></li>
+                    <li>Mật khẩu: <strong>%s</strong></li>
+                </ul>
+                <a href="http://localhost:3000/login" class="btn" target="_blank" rel="noopener">Đăng nhập ngay</a>
+                <p>Nếu bạn có thắc mắc hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi qua email <a href="mailto:linhnhph33830@fpt.edu.vn">linhnhph33830@fpt.edu.vn</a> hoặc điện thoại <strong>0909 123 456</strong>.</p>
+                <p>Chúc bạn một ngày thật nhiều sức khỏe và niềm vui với rau xanh từ GreenFarm!</p>
+                <p>Trân trọng,<br />Đội ngũ GreenFarm</p>
+            </div>
+            <div class="footer">© 2025 GreenFarm. Bản quyền thuộc về GreenFarm.</div>
+        </div>
+    </body>
+    </html>
+    """;
+
+
+
     public void createAccount(AccountRequest accountRequest) {
         Optional<Account> accountOP = accountRepository.findByEmail(accountRequest.getEmail());
         if (accountOP.isPresent()) {
@@ -48,27 +95,12 @@ public class AccountService {
             String password = accountWithPassword.getPassword();
             String email = account.getEmail();
 
-            String emailContent = String.format(
-                    "Kính chào Quý khách hàng,%n" +
-                            "Chào mừng bạn đến với %s!%n" +
-                            "Thông tin tài khoản của bạn như sau:%n" +
-                            "• Tên tài khoản: %s%n" +
-                            "• Mật khẩu: %s%n" +
-                            "Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi qua email %s hoặc số điện thoại %s.%n%n" +
-                            "Trân trọng,%n%s",
-                    "GreenBee",
-                    email,
-                    password,
-                    "linhnhph33830@fpt.edu.vn",
-                    "0909 123 456",
-                    "GreenBee"
-            );
+            // Tạo nội dung HTML email với thông tin tài khoản
+            String emailContent = String.format(htmlTemplate, email, password);
 
-            emailService.sendEmail(
-                    email,
-                    "Chào mừng bạn đến với Greenbee!",
-                    emailContent
-            );
+            // Gửi email với nội dung HTML
+            emailService.sendRegisterEmail(email, "Chào mừng bạn đến với GreenFarm!", emailContent); // true = gửi HTML
+
         } else {
             throw new RuntimeException("Lỗi thêm tài khoản mới!");
         }

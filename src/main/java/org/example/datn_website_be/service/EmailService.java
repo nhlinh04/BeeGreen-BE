@@ -25,6 +25,21 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    public void sendRegisterEmail(String to, String subject, String htmlContent) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true); // true = nội dung HTML
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Lỗi gửi email: " + e.getMessage(), e);
+        }
+    }
+
     public void sendEmailVoucher(List<String> to, String subject, String body) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
 
