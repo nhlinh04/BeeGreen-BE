@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -41,4 +39,7 @@ public class Batches extends BaseEntity{
     @JsonManagedReference(value = "billDetailBatchesBatchesReference")
     @OneToMany(mappedBy = "batches")
     private List<BillDetailBatches> billDetailBatches;
+
+    @Column(name = "near_expiry_price")
+    private double nearExpiryPrice;
 }
