@@ -8,4 +8,7 @@ import java.util.List;
 public interface BatchDiscountRuleRepository extends JpaRepository<BatchDiscountRule, Long> {
 
     List<BatchDiscountRule> findByStatus(String active);
+
+    boolean existsByDaysBeforeExpiry(Integer daysBeforeExpiry);
+
 }

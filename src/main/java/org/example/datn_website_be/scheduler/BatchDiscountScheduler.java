@@ -3,6 +3,7 @@ package org.example.datn_website_be.scheduler;
 import lombok.RequiredArgsConstructor;
 import org.example.datn_website_be.model.BatchDiscountRule;
 import org.example.datn_website_be.model.Batches;
+import org.example.datn_website_be.model.Product;
 import org.example.datn_website_be.model.Promotion;
 import org.example.datn_website_be.repository.BatchDiscountRuleRepository;
 import org.example.datn_website_be.repository.BatchesRepository;
@@ -32,7 +33,7 @@ public class BatchDiscountScheduler {
 
         for (Batches batch : batches) {
             // Lấy discount promotion hiện tại
-            Integer promotionDiscount = getCurrentPromotionDiscount(batch); // Promotion discount kiểu Integer
+            Integer promotionDiscount = getCurrentPromotionDiscount(batch.getProduct()); // Promotion discount kiểu Integer
 
             // Tính số ngày còn lại cho mỗi batch
             LocalDateTime expiryDate = batch.getHSD().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -66,9 +67,9 @@ public class BatchDiscountScheduler {
     }
 
 
-    private Integer getCurrentPromotionDiscount(Batches batch) {
+    private Integer getCurrentPromotionDiscount(Product product) {
         // Lấy tất cả các promotion liên quan đến sản phẩm
-        List<Promotion> activePromotions = promotionRepository.findUpcomingDiscounts(LocalDateTime.now(), "ACTIVE");
+        List<Promotion> activePromotions = promotionRepository.findUpcomingDiscountsForProduct(LocalDateTime.now(), "ACTIVE", product.getId());
 
         // Nếu có chương trình promotion đang hoạt động
         if (!activePromotions.isEmpty()) {

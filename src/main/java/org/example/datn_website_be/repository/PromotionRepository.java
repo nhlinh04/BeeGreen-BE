@@ -37,7 +37,14 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
     Optional<Promotion> findPromotionByIdAndStatus(@Param("id") Long id, List<String> status);
 
 
-    @Query("SELECT p FROM Promotion p WHERE p.status = :status AND p.product.id = :productId AND p.startAt <= :currentDateTime AND p.endAt >= :currentDateTime")
+    @Query("""
+    SELECT p FROM Promotion p 
+    JOIN p.promotionDetail pd 
+    WHERE p.status = :status 
+      AND pd.product.id = :productId 
+      AND p.startAt <= :currentDateTime 
+      AND p.endAt >= :currentDateTime
+    """)
     List<Promotion> findUpcomingDiscountsForProduct(@Param("currentDateTime") LocalDateTime currentDateTime, @Param("status") String status, @Param("productId") Long productId);
 
 

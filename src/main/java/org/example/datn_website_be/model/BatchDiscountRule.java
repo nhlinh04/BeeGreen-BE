@@ -1,8 +1,6 @@
 package org.example.datn_website_be.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -12,13 +10,19 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BatchDiscountRule extends BaseEntity {
+public class BatchDiscountRule {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "days_before_expiry", nullable = false)
+    @Column(name = "days_before_expiry", nullable = false, unique = true)
     private int daysBeforeExpiry;
 
     @Column(name = "discount_percent", nullable = false, precision = 5, scale = 2)
     private int discountPercent;
+
+    @Column(name = "status", nullable = false)
+    private String status;
 
 }
 

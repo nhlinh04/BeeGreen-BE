@@ -42,7 +42,7 @@ public class BillController {
         List<BillStatisticalPieResponse> statistics = billService.getCompletedBillStatistics();
         return ResponseEntity.ok(statistics);
         }catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.  getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
