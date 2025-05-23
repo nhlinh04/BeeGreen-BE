@@ -9,6 +9,8 @@ import org.example.datn_website_be.repository.BatchDiscountRuleRepository;
 import org.example.datn_website_be.repository.BatchesRepository;
 import org.example.datn_website_be.repository.PromotionRepository;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -16,7 +18,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
+@Component
 @RequiredArgsConstructor
 public class BatchDiscountScheduler {
 

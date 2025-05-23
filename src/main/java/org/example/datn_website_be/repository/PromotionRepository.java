@@ -36,7 +36,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
     @Query("SELECT d FROM Promotion d WHERE d.id = :id  AND d.status in(:status)")
     Optional<Promotion> findPromotionByIdAndStatus(@Param("id") Long id, List<String> status);
 
-
     @Query("""
     SELECT p FROM Promotion p 
     JOIN p.promotionDetail pd 

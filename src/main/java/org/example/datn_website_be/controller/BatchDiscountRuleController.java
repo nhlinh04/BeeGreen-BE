@@ -18,7 +18,7 @@ public class BatchDiscountRuleController {
     private final BatchDiscountRuleService service;
 
     @PostMapping("/create")
-//    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<BatchDiscountRule> create(@RequestBody @Valid BatchDiscountRuleRequest request) {
         return ResponseEntity.ok(service.add(request));
     }

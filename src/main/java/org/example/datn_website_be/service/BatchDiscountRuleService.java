@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.datn_website_be.dto.request.BatchDiscountRuleRequest;
 import org.example.datn_website_be.model.BatchDiscountRule;
 import org.example.datn_website_be.repository.BatchDiscountRuleRepository;
+import org.example.datn_website_be.scheduler.BatchDiscountScheduler;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BatchDiscountRuleService {
     private final BatchDiscountRuleRepository batchDiscountRuleRepository;
+    private final BatchDiscountScheduler batchDiscountScheduler;
 
     public BatchDiscountRule add(@Valid BatchDiscountRuleRequest request) {
 
@@ -27,7 +29,10 @@ public class BatchDiscountRuleService {
                 .status(request.getStatus())
                 .build();
 
-        return batchDiscountRuleRepository.save(rule);
+        BatchDiscountRule save = batchDiscountRuleRepository.save(rule);
+        batchDiscountScheduler.applyBatchDiscounts();
+
+        return save;
     }
 
     public BatchDiscountRule update(Long id, BatchDiscountRuleRequest request) {
@@ -46,7 +51,10 @@ public class BatchDiscountRuleService {
         existing.setDiscountPercent(request.getDiscountPercent());
         existing.setStatus(request.getStatus());
 
-        return batchDiscountRuleRepository.save(existing);
+        BatchDiscountRule save = batchDiscountRuleRepository.save(existing);
+        batchDiscountScheduler.applyBatchDiscounts();
+        return save;
+
     }
 
 
@@ -58,7 +66,9 @@ public class BatchDiscountRuleService {
         BatchDiscountRule config = batchDiscountRuleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy cấu hình với ID: " + id));
         config.setStatus(newStatus ? "ACTIVE" : "INACTIVE");
+
         batchDiscountRuleRepository.save(config);
+        batchDiscountScheduler.applyBatchDiscounts();
     }
 
     public BatchDiscountRule getById(Long id) {
