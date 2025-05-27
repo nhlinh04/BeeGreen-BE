@@ -51,8 +51,8 @@ public class BatchesService {
                         .product(product)
                         .build();
                 batches.setQuantity(0.0);
-                batchesRepository.save(batches);
-                productRepository.save(product);
+                batchesRepository.saveAndFlush(batches);
+                productRepository.saveAndFlush(product);
 
                 productHistoryRepository.save(productHistory);
             }
