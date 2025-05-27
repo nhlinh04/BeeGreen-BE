@@ -150,7 +150,7 @@ public class BillController {
         if (deliveryDate != null && receiveDate != null && deliveryDate.after(receiveDate)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "deliveryDate must be before or equal to receiveDate"
+                    "Vui lòng chọn ngày giao hàng trước hoặc bằng ngày nhận hàng."
             );
         }
 
